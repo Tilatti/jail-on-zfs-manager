@@ -1,6 +1,6 @@
 #! /bin/bash
 
-echo "Building freebsd-minimal jail ..."
+echo "Building freebsd-minimal image ..."
 
 source builder.sh
 
@@ -10,7 +10,7 @@ ISO=../FreeBSD-10.2-RELEASE-amd64-disc1.iso
 # Create the freebsd minimal image.
 
 create_img ${POOL} freebsd-minimal
-ROOTDIR=/${POOL}/freebsd-minimal/
+ROOT_DIR=/${POOL}/freebsd-minimal/
 
 # Populate the new image.
 

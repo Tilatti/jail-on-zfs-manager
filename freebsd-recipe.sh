@@ -1,6 +1,6 @@
 #! /bin/bash
 
-echo "Building freebsd jail ..."
+echo "Building freebsd image ..."
 
 source builder.sh
 

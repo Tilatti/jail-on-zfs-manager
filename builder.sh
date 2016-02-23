@@ -104,39 +104,6 @@ function populate {
 	fi
 }
 
-# Adding a new jail corresponding to populated root directory.
-
-# $1 : Jail configuration file
-# $2 : New jail name
-# $3 : Populated root directory
-
-function add_jail {
-	CONF_FILE=$1
-	JAIL_NAME=$2
-	ROOT_DIR=$3
-
-	# Check if an previous entry with same name doesn't exist.
-
-	# TODO
-
-	# Add a configuration entry.
-
-	cat >> ${CONF_FILE} <<- EOF
-		${JAIL_NAME} {
-			path=${ROOT_DIR};
-			mount.devfs;
-
-			exec.start = "/bin/sh /etc/rc";
-			exec.stop = "/bin/sh /etc/rc.shutdown";
-
-			host.hostname = ${JAIL_NAME};
-			ip4.addr = ${IP_ADDR};
-			interface = ${NET_INTERFACE};
-			allow.raw_sockets;
-		}
-	EOF
-}
-
 # Create a new storage pool
 
 # $1 : output file
@@ -173,7 +140,6 @@ function create_storage_pool {
 function create_img {
 	POOL=$1
 	IMAGE=$2
-	ROOT_DIR=/${POOL}/${IMAGE}
 
 	# Initialize ZFS driver.
 
@@ -182,13 +148,11 @@ function create_img {
 	# Create the filesystem.
 
 	zfs create ${POOL}/${IMAGE}
-
-	# Add a corresponding jail in the jail configuration file.
-
-	add_jail /root/jail.conf ${IMAGE} ${ROOT_DIR}
 }
 
 # Clone an existing image.
+# Note: A session can not be directly cloned. A image has to be generated with
+# the fix_changes() function.
 
 # $1 : pool name
 # $2 : source image name
@@ -198,22 +162,19 @@ function clone_img {
 	POOL=$1
 	SRC=$2
 	DST=$3
-	ROOT_DIR=/${POOL}/${DST}
 
 	# Initialize ZFS driver.
 
 	init_zfs
 	
-	# Clone the snapshot.
+	# Clone the snapshot assocatied with the image.
 	
 	zfs clone ${POOL}/${SRC}@snapshot ${POOL}/${DST}
-
-	# Add a corresponding jail.
-
-	add_jail /root/jail.conf ${DST} ${ROOT_DIR}
 }
 
 # Common final actions for each created image.
+# Note: Session rootfs has only to be cloned image. It is the fix_changes() 
+# function which call the finalize_img() in order to generate the image.
 
 # $1 : pool name
 # $2 : image name
@@ -238,10 +199,6 @@ function remove_img {
 	IMAGE=$2
 	FORCE=$3
 
-	# Shutdown the corresponding jail
-
-	jail -f /root/jail.conf -r ${IMAGE}
-
 	# Destroy the ZFS data-set containing the image.
 
 	if [ ${FORCE} = true ];
@@ -256,10 +213,6 @@ function remove_img {
 		echo "Warning: the ZFS data-set corresponding to image ${POOL}/${IMAGE} \
 		is propably not correctly destroyed." 1>&2
 	fi
-
-	# Remove the corresponding jail on the jail configuration file.
-
-	# TODO
 }
 
 # Default setting.
@@ -269,16 +222,14 @@ CONF_FILE=${HOME}/jail.conf
 ISO=/root/FreeBSD-10.2-RELEASE-amd64-disc1.iso
 
 JAIL_NAME=test
-NET_INTERFACE=re0
-IP_ADDR="192.168.1.1/24"
 
 # Perform no action by default.
 
-CLEAN_UP=false
-CREATE=false
-LAUNCH=false
-SHUTDOWN=false
-REMOVE=false
+#CLEAN_UP=false
+#CREATE=false
+#LAUNCH=false
+#SHUTDOWN=false
+#REMOVE=false
 
 # Parse the arguments.
 
