@@ -78,7 +78,7 @@ function fix_changes {
 
 	# Remove the session
 	
-	remove_session ${SESSION}
+	remove_session ${POOL} ${SESSION}
 
 	# Finalize the image in order to be able to create new image and
 	# session from it

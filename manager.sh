@@ -5,11 +5,11 @@ source session.sh
 
 function print_usage {
 	echo "manager.sh usage:"
-	echo "	manager.sh create pool <pool_name> image <image_name> session <session_name>"
-	echo "	manager.sh remove pool <pool_name> image <image_name> session <session_name>"
-	echo "	manager.sh fix pool <pool_name> image <image_name> session <session_name>"
-	echo "	manager.sh launch session <session_name>"
-	echo "	manager.sh shutdown session <session_name>"
+	echo "	manager.sh create   pool <pool_name> image <image_name> session <session_name>"
+	echo "	manager.sh fix 	    pool <pool_name> image <image_name> session <session_name>"
+	echo "	manager.sh remove   pool <pool_name>                    session <session_name>"
+	echo "	manager.sh launch                                       session <session_name>"
+	echo "	manager.sh shutdown                                     session <session_name>"
 	echo "	manager.sh help"
 }
 
@@ -111,17 +111,47 @@ then
 	
 	# Check the existence of the image
 
-	ls /${POOL}/${IMAGE}
-	if [ $? -ne 0 ];
-	then
-		echo "ERROR: The source image doesn't exist." 1>&2
-		exit -1
-	fi
+	# TODO
+	#ls /${POOL}/${IMAGE} > /dev/null
+	#if [ $? -ne 0 ];
+	#then
+	#	echo "ERROR: The source image doesn't exist." 1>&2
+	#	exit -1
+	#fi
 
 	# Add a session from the image.
 
 	add_session ${POOL} ${IMAGE} ${SESSION} 
 fi
+
+# Remove an existing session
+
+if [ ${REMOVE} = true ];
+then
+	# Check if mandatory arguments are specified
+
+	if [ ${POOL} = "no-pool" -o ${SESSION} = "no-session" ];
+	then
+		echo "ERROR: A mandatory argument is missing !" 1>&2
+		print_usage
+		exit -1
+	fi
+	
+	# Check the existence of the image
+
+	# TODO
+#	ls /${POOL}/${IMAGE} > /dev/null
+#	if [ $? -ne 0 ];
+#	then
+#		echo "ERROR: The source image doesn't exist." 1>&2
+#		exit -1
+#	fi
+
+	# Add a session from the image.
+
+	remove_session ${POOL} ${SESSION} 
+fi
+
 
 # Fix a session. (create a new image from session modifications)
 

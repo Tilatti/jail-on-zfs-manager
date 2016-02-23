@@ -183,6 +183,15 @@ function finalize_img {
 	POOL=$1
 	IMAGE=$2
 
+	# Modifications are not authorized directly on an image, so unmount the
+	# corresponing filesystem ...
+
+	zfs unmount -f ${POOL}/${IMAGE}
+
+	# ... and disable automatic mount.
+
+	zfs set mountpoint=none ${POOL}/${IMAGE}
+
 	# Create a snapshot of the image, will be used to clone the image.
 	
 	zfs snapshot ${POOL}/${IMAGE}@snapshot
